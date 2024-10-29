@@ -39,6 +39,11 @@ public class TaskManager {
     public Long createTask(Task task){
         Long taskId = getIdForNewTask();
         task.setId(taskId);
+        if (isEpic(task)){
+            //special update connections for epic-subtasks
+        } else if (isSubtask(task)){
+            //special update connections for subtask-epic
+        }
         tasks.put(taskId, task);
         return taskId;
     }
@@ -56,7 +61,10 @@ public class TaskManager {
 
     public Collection<Subtask> getSubtasks(Long epicId){
         Epic epic = getEpicById(epicId);
-        return epic.getSubtasks();
+        return epic.getSubtasksIds()
+                .parallelStream()
+                .filter(this::isSubtask)
+                .map(subtask -> (Subtask) getTask(subtask)).toList();
     }
 
     private void checkTaskId(Long taskId){
@@ -78,6 +86,10 @@ public class TaskManager {
 
     private boolean isEpic(Task task){
         return task instanceof Epic;
+    }
+
+    private boolean isSubtask(Long taskId){
+        return isSubtask(getTask(taskId));
     }
 
     private boolean isSubtask(Task task){
