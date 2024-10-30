@@ -15,51 +15,51 @@ public class Main {
                 "Нужно взять деньги, выйти из дома в магазин, купить молока с жирностью 3%",
                 Status.NEW
         );
-        taskManager.createTask(throwGarbage);
-        taskManager.createTask(buyMilk);
+        taskManager.create(throwGarbage);
+        Long buyMilkId = taskManager.create(buyMilk);
 
         // Создание эпика с 2мя подзадачами
         Epic makeTea = new Epic(
                 "Сделать чай",
                 "Сложная задача в 2 шага - сделать чай"
                 );
+        taskManager.create(makeTea);
         Subtask makeTeaFirst = new Subtask(
                 "Заварить чай",
                 "Найти чайник, налить в него воды, довести до кипения",
                 Status.NEW,
-                makeTea
+                makeTea.getId()
         );
         Subtask makeTeaSecond = new Subtask(
                 "Налить чай в стакан",
                 "Найти кружку, добавить заварки, влить в неё кипяток",
                 Status.NEW,
-                makeTea
+                makeTea.getId()
         );
-        taskManager.createTask(makeTeaFirst);
-        taskManager.createTask(makeTeaSecond);
-        taskManager.createTask(makeTea);
+        Long makeTeaFirstId = taskManager.create(makeTeaFirst);
+        taskManager.create(makeTeaSecond);
 
         //Создание эпика с 1й подзадачей
         Epic preheatCheburek = new Epic(
                 "Разогреть чебурек",
                 "Эпик по приготовлению чебуреков"
         );
+        Long preheatCheburekId = taskManager.create(preheatCheburek);
 
         Subtask preheatCheburekFirst = new Subtask(
                 "Разогревание чебурека, акт 1, действие 1",
                 "Поставить чебурек в микроволновку на мощность 800W на 3-5 минут",
                 Status.NEW,
-                preheatCheburek
+                preheatCheburek.getId()
         );
-        taskManager.createTask(preheatCheburek);
-        taskManager.createTask(preheatCheburekFirst);
+        taskManager.create(preheatCheburekFirst);
 
         //Вывод
         System.out.println("Задачи всех типов:");
         System.out.println(taskManager.getAllTypesTasks());
 
         System.out.println("Обычные задачи:");
-        System.out.println(taskManager.getCommonTasks());
+        System.out.println(taskManager.getTasks());
 
         System.out.println("Эпики:");
         System.out.println(taskManager.getEpics());
@@ -69,16 +69,54 @@ public class Main {
 
         //Изменение статуса отдельно стоящей задачи
         Task buyMilkUpdateStatus = new Task(
+                buyMilkId,
                 buyMilk.getName(),
                 buyMilk.getDescription(),
                 Status.IN_PROGRESS
         );
-        //taskManager.updateTask();
+        taskManager.update(buyMilkUpdateStatus);
+
+        // Изменение статуса подзадачи эпика
         Subtask makeTeaFirstUpdateStatus = new Subtask(
+                makeTeaFirstId,
                 makeTeaFirst.getName(),
                 makeTeaFirst.getDescription(),
                 Status.IN_PROGRESS,
-                makeTea
+                makeTea.getId()
         );
+        taskManager.update(makeTeaFirstUpdateStatus);
+
+        //Вывод изменений
+        System.out.println("**изменение статусов**");
+        System.out.println("Обычная задача:");
+        System.out.println(taskManager.getTask(buyMilkId));
+
+        System.out.println("Подзадача:");
+        System.out.println(taskManager.getSubtask(makeTeaFirstId));
+
+        System.out.println("Эпик подзадачи:");
+        System.out.println(taskManager.getEpic(makeTea.getId()));
+
+        // Удаление задачи
+        taskManager.removeTask(buyMilkId);
+
+        // Удаление подзадачи эпика
+        taskManager.removeSubtask(makeTeaFirstId);
+
+        // Удаление эпика
+        taskManager.removeEpic(preheatCheburekId);
+
+
+        //Вывод
+        System.out.println("**удаление задач**");
+
+        System.out.println("Обычные задачи:");
+        System.out.println(taskManager.getTasks());
+
+        System.out.println("Эпики:");
+        System.out.println(taskManager.getEpics());
+
+        System.out.println("Подзадачки:");
+        System.out.println(taskManager.getSubtasks());
     }
 }
