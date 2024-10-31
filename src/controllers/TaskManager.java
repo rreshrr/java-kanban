@@ -1,18 +1,24 @@
+package controllers;
+
+import model.Epic;
+import model.Status;
+import model.Subtask;
+import model.Task;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class TaskManager {
 
     private static final AtomicLong TASK_COUNTER = new AtomicLong(133);
-    Map<Long, Task> tasks;
-    Map<Long, Epic> epics;
-    Map<Long, Subtask> subtasks;
+    private final Map<Long, Task> tasks;
+    private final Map<Long, Epic> epics;
+    private final Map<Long, Subtask> subtasks;
 
     public TaskManager(){
         tasks = new HashMap<>();
@@ -20,28 +26,22 @@ public class TaskManager {
         subtasks = new HashMap<>();
     }
 
-    public Collection<Task> getAllTypesTasks(){
+    public List<? extends Task> getAllTypesTasks(){
        return Stream.of(tasks, epics, subtasks)
                .flatMap(map -> map.values().stream())
-               .collect(Collectors.toList());
+               .toList();
     }
 
-    public Collection<Epic> getEpics(){
-        return epics.values();
+    public List<Epic> getEpics(){
+        return new ArrayList<>(epics.values());
     }
 
-    public Collection<Subtask> getSubtasks(){
-        return  subtasks.values();
+    public List<Subtask> getSubtasks(){
+        return  new ArrayList<>(subtasks.values());
     }
 
     public Collection<Task> getTasks(){
-        return  tasks.values();
-    }
-
-    public void clearAll(){
-        clearTasks();
-        clearEpics();
-        clearSubtasks();
+        return  new ArrayList<>(tasks.values());
     }
 
     public void clearTasks(){
@@ -50,9 +50,14 @@ public class TaskManager {
 
     public void clearEpics(){
         epics.clear();
+        subtasks.clear();
     }
 
     public void clearSubtasks(){
+        for (Epic epic : epics.values()) {
+            epic.clearSubtasks();
+            updateEpicStatus(epic.getId());
+        }
         subtasks.clear();
     }
 
@@ -66,17 +71,24 @@ public class TaskManager {
         return epics.get(epicId);
     }
 
-    Subtask getSubtask(Long subtaskId){
+    public Subtask getSubtask(Long subtaskId){
         checkTaskId(subtaskId, subtasks);
         return subtasks.get(subtaskId);
     }
 
     public Long create(Task task){
-        return saveTask(task);
+        task.setId(getIdForNewTask());
+        return save(task);
+    }
+
+    public Long create(Epic epic){
+        epic.setId(getIdForNewTask());
+        return save(epic);
     }
 
     public Long create(Subtask subtask){
-        saveTask(subtask);
+        subtask.setId(getIdForNewTask());
+        save(subtask);
         Epic epic = getEpic(subtask.getEpicId());
         //добавлям subtask к списку subtasks его эпика
         epic.addSubtask(subtask.getId());
@@ -86,17 +98,17 @@ public class TaskManager {
 
     public void update(Task task){
         checkTaskId(task.getId(), tasks);
-        saveTask(task);
+        save(task);
     }
 
     public void update(Epic epic){
         checkTaskId(epic.getId(), epics);
-        saveTask(epic);
+        save(epic);
     }
 
     public void update(Subtask subtask){
         checkTaskId(subtask.getId(), subtasks);
-        saveTask(subtask);
+        save(subtask);
         updateEpicStatus(subtask.getEpicId());
     }
 
@@ -151,20 +163,22 @@ public class TaskManager {
         return TASK_COUNTER.getAndIncrement();
     }
 
-    private Long saveTask(Task task) {
-        if (task.getId() == null) {
-            task.setId(getIdForNewTask());
-        }
-
-        if (task instanceof Subtask) {
-            subtasks.put(task.getId(), (Subtask) task);
-        } else if (task instanceof Epic) {
-            epics.put(task.getId(), (Epic) task);
-        } else {
-            tasks.put(task.getId(), task);
-        }
-
+    private Long save(Task task) {
+        tasks.put(task.getId(), task);
         return task.getId();
     }
+
+    private Long save(Epic epic) {
+        epics.put(epic.getId(), epic);
+        return epic.getId();
+    }
+
+    private Long save(Subtask subtask) {
+        subtasks.put(subtask.getId(), subtask);
+        return subtask.getId();
+    }
+
+
+
 
 }
