@@ -2,9 +2,10 @@ package model;
 
 import java.util.ArrayList;
 import java.util.List;
+
 public class Epic extends Task {
 
-    private List<Long> subtasksIds;
+    private final List<Long> subtasksIds;
 
     public Epic(String name, String description) {
         super(name, description, Status.NEW);
@@ -20,15 +21,15 @@ public class Epic extends Task {
         return subtasksIds;
     }
 
-    public void addSubtask(Long subtaskId){
+    public void addSubtask(Long subtaskId) {
         subtasksIds.add(subtaskId);
     }
 
-    public void removeSubtask(Long subtaskId){
+    public void removeSubtask(Long subtaskId) {
         subtasksIds.remove(subtaskId);
     }
 
-    public void clearSubtasks(){
+    public void clearSubtasks() {
         subtasksIds.clear();
     }
 

@@ -28,7 +28,7 @@ public class Main {
         Epic makeTea = new Epic(
                 "Сделать чай",
                 "Сложная задача в 2 шага - сделать чай"
-                );
+        );
         taskManager.create(makeTea);
         Subtask makeTeaFirst = new Subtask(
                 "Заварить чай",
