@@ -17,11 +17,19 @@ public class Epic extends Task {
         setId(id);
     }
 
+    public Epic(Epic epic) {
+        super(epic);
+        this.subtasksIds = new ArrayList<>(epic.subtasksIds); // создаем копию списка подзадач
+    }
+
     public List<Long> getSubtasksIds() {
         return subtasksIds;
     }
 
     public void addSubtask(Long subtaskId) {
+        if (subtaskId.equals(getId())) {
+            throw new IllegalArgumentException("Epic cannot be own subtask");
+        }
         subtasksIds.add(subtaskId);
     }
 

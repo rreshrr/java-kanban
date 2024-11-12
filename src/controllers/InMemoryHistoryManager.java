@@ -1,5 +1,7 @@
 package controllers;
 
+import model.Epic;
+import model.Subtask;
 import model.Task;
 
 import java.util.ArrayList;
@@ -30,6 +32,23 @@ public class InMemoryHistoryManager implements HistoryManager {
         if (history.size() >= HISTORY_DEEP) {
             history.removeFirst();
         }
-        history.add(task);
+        history.add(new Task(task));
     }
+
+    @Override
+    public void add(Epic epic) {
+        if (history.size() >= HISTORY_DEEP) {
+            history.removeFirst();
+        }
+        history.add(new Epic(epic));
+    }
+
+    @Override
+    public void add(Subtask subtask) {
+        if (history.size() >= HISTORY_DEEP) {
+            history.removeFirst();
+        }
+        history.add(new Subtask(subtask));
+    }
+
 }

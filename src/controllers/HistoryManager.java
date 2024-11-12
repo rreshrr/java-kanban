@@ -1,5 +1,7 @@
 package controllers;
 
+import model.Epic;
+import model.Subtask;
 import model.Task;
 
 import java.util.List;
@@ -10,4 +12,7 @@ public interface HistoryManager {
 
     void add(Task task);
 
+    void add(Subtask subtask);
+
+    void add(Epic epic);
 }

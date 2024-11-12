@@ -11,7 +11,15 @@ public class Subtask extends Task {
 
     public Subtask(Long id, String name, String description, Status status, Long epicId) {
         this(name, description, status, epicId);
+        if (epicId.equals(id)) {
+            throw new IllegalArgumentException("Subtask cannot have same id as epic");
+        }
         this.setId(id);
+    }
+
+    public Subtask(Subtask subtask) {
+        super(subtask);
+        this.epicId = subtask.epicId;
     }
 
     public Long getEpicId() {

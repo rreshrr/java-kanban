@@ -23,6 +23,13 @@ public class Task {
         this.id = id;
     }
 
+    public Task(Task task) {
+        this.id = task.id;
+        this.name = task.name;
+        this.description = task.description;
+        this.status = task.status;
+    }
+
     public Long getId() {
         return id;
     }
