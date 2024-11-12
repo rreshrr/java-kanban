@@ -1,176 +1,51 @@
 package controllers;
 
 import model.Epic;
-import model.Status;
 import model.Subtask;
 import model.Task;
 
-import java.util.*;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Stream;
+import java.util.List;
 
-public class TaskManager {
+public interface TaskManager {
+    List<? extends Task> getAllTypesTasks();
 
-    private static final AtomicLong TASK_COUNTER = new AtomicLong(133);
-    private final Map<Long, Task> tasks;
-    private final Map<Long, Epic> epics;
-    private final Map<Long, Subtask> subtasks;
+    List<Epic> getEpics();
 
-    public TaskManager() {
-        tasks = new HashMap<>();
-        epics = new HashMap<>();
-        subtasks = new HashMap<>();
-    }
+    List<Subtask> getSubtasks();
 
-    private static Long getIdForNewTask() {
-        return TASK_COUNTER.getAndIncrement();
-    }
+    List<Task> getTasks();
 
-    public List<? extends Task> getAllTypesTasks() {
-        return Stream.of(tasks, epics, subtasks)
-                .flatMap(map -> map.values().stream())
-                .toList();
-    }
+    List<Task> getHistory();
 
-    public List<Epic> getEpics() {
-        return new ArrayList<>(epics.values());
-    }
+    void clearTasks();
 
-    public List<Subtask> getSubtasks() {
-        return new ArrayList<>(subtasks.values());
-    }
+    void clearEpics();
 
-    public Collection<Task> getTasks() {
-        return new ArrayList<>(tasks.values());
-    }
+    void clearSubtasks();
 
-    public void clearTasks() {
-        tasks.clear();
-    }
+    Task getTask(Long taskId);
 
-    public void clearEpics() {
-        epics.clear();
-        subtasks.clear();
-    }
+    Epic getEpic(Long epicId);
 
-    public void clearSubtasks() {
-        for (Epic epic : epics.values()) {
-            epic.clearSubtasks();
-            updateEpicStatus(epic.getId());
-        }
-        subtasks.clear();
-    }
+    List<Subtask> getEpicSubtasks(Long epicId);
 
-    public Task getTask(Long taskId) {
-        checkTaskId(taskId, tasks);
-        return tasks.get(taskId);
-    }
+    Subtask getSubtask(Long subtaskId);
 
-    public Epic getEpic(Long epicId) {
-        checkTaskId(epicId, epics);
-        return epics.get(epicId);
-    }
+    Long create(Task task);
 
-    public Subtask getSubtask(Long subtaskId) {
-        checkTaskId(subtaskId, subtasks);
-        return subtasks.get(subtaskId);
-    }
+    Long create(Epic epic);
 
-    public Long create(Task task) {
-        task.setId(getIdForNewTask());
-        return save(task);
-    }
+    Long create(Subtask subtask);
 
-    public Long create(Epic epic) {
-        epic.setId(getIdForNewTask());
-        return save(epic);
-    }
+    void update(Task task);
 
-    public Long create(Subtask subtask) {
-        subtask.setId(getIdForNewTask());
-        save(subtask);
-        Epic epic = getEpic(subtask.getEpicId());
-        //добавлям subtask к списку subtasks его эпика
-        epic.addSubtask(subtask.getId());
-        updateEpicStatus(epic);
-        return subtask.getId();
-    }
+    void update(Epic epic);
 
-    public void update(Task task) {
-        checkTaskId(task.getId(), tasks);
-        save(task);
-    }
+    void update(Subtask subtask);
 
-    public void update(Epic epic) {
-        checkTaskId(epic.getId(), epics);
-        save(epic);
-    }
+    Task removeTask(Long taskId);
 
-    public void update(Subtask subtask) {
-        checkTaskId(subtask.getId(), subtasks);
-        save(subtask);
-        updateEpicStatus(subtask.getEpicId());
-    }
+    Epic removeEpic(Long epicId);
 
-    public Task removeTask(Long taskId) {
-        checkTaskId(taskId, tasks);
-        return tasks.remove(taskId);
-    }
-
-    public Epic removeEpic(Long epicId) {
-        checkTaskId(epicId, epics);
-        Epic epic = epics.get(epicId);
-        List<Long> subtaskIdsCopy = new ArrayList<>(epic.getSubtasksIds());
-        subtaskIdsCopy.forEach(this::removeSubtask);
-        return epics.remove(epicId);
-    }
-
-    public Subtask removeSubtask(Long subtaskId) {
-        checkTaskId(subtaskId, subtasks);
-        Subtask subtask = subtasks.remove(subtaskId);
-        Epic epic = epics.get(subtask.getEpicId());
-        epic.removeSubtask(subtaskId);
-        updateEpicStatus(epic);
-        return subtask;
-    }
-
-    private void checkTaskId(Long taskId, Map<Long, ? extends Task> tasks) {
-        if (!tasks.containsKey(taskId)) {
-            throw new IllegalArgumentException("There is no item with this ID: %s in %s".formatted(taskId, tasks));
-        }
-    }
-
-    private void updateEpicStatus(Long epicId) {
-        updateEpicStatus(getEpic(epicId));
-    }
-
-    private void updateEpicStatus(Epic epic) {
-        List<Subtask> subtasksOfEpic = epic.getSubtasksIds()
-                .stream()
-                .map(this::getSubtask)
-                .toList();
-
-        if (subtasksOfEpic.stream().allMatch(s -> s.getStatus() == Status.NEW)) {
-            epic.setStatus(Status.NEW);
-        } else if (subtasksOfEpic.stream().allMatch(s -> s.getStatus() == Status.DONE)) {
-            epic.setStatus(Status.DONE);
-        } else {
-            epic.setStatus(Status.IN_PROGRESS);
-        }
-    }
-
-    private Long save(Task task) {
-        tasks.put(task.getId(), task);
-        return task.getId();
-    }
-
-    private Long save(Epic epic) {
-        epics.put(epic.getId(), epic);
-        return epic.getId();
-    }
-
-    private Long save(Subtask subtask) {
-        subtasks.put(subtask.getId(), subtask);
-        return subtask.getId();
-    }
+    Subtask removeSubtask(Long subtaskId);
 }
