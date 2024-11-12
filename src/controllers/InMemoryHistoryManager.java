@@ -9,7 +9,7 @@ import java.util.List;
 
 public class InMemoryHistoryManager implements HistoryManager {
 
-    private final int HISTORY_DEEP;
+    private final int historyDeep;
 
     private final List<Task> history;
 
@@ -18,7 +18,7 @@ public class InMemoryHistoryManager implements HistoryManager {
     }
 
     public InMemoryHistoryManager(int historyDeep) {
-        HISTORY_DEEP = historyDeep;
+        this.historyDeep = historyDeep;
         history = new ArrayList<>(historyDeep);
     }
 
@@ -29,7 +29,7 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public void add(Task task) {
-        if (history.size() >= HISTORY_DEEP) {
+        if (history.size() >= historyDeep) {
             history.removeFirst();
         }
         history.add(new Task(task));
@@ -37,7 +37,7 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public void add(Epic epic) {
-        if (history.size() >= HISTORY_DEEP) {
+        if (history.size() >= historyDeep) {
             history.removeFirst();
         }
         history.add(new Epic(epic));
@@ -45,7 +45,7 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public void add(Subtask subtask) {
-        if (history.size() >= HISTORY_DEEP) {
+        if (history.size() >= historyDeep) {
             history.removeFirst();
         }
         history.add(new Subtask(subtask));
