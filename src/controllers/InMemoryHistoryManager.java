@@ -34,21 +34,4 @@ public class InMemoryHistoryManager implements HistoryManager {
         }
         history.add(new Task(task));
     }
-
-    @Override
-    public void add(Epic epic) {
-        if (history.size() >= historyDeep) {
-            history.removeFirst();
-        }
-        history.add(new Epic(epic));
-    }
-
-    @Override
-    public void add(Subtask subtask) {
-        if (history.size() >= historyDeep) {
-            history.removeFirst();
-        }
-        history.add(new Subtask(subtask));
-    }
-
 }
